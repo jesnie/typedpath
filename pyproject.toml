@@ -1,0 +1,123 @@
+[tool.poetry]
+name = "typedpath"
+version = "0.1.0"
+description = "Use typed Python objects to represent files and directories."
+authors = ["Jesper Nielsen <jespernielsen1982+git@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+mypy = "^0.991"
+pylint = "^2.16.1"
+isort = "^5.12.0"
+taskipy = "^1.10.3"
+pytest = "^7.2.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 100
+target-version = ['py39']
+
+[tool.mypy]
+python_version = "3.9"
+show_error_codes = true
+# First we turn on *all the checks*, and then we turn off those that are too annoying.
+strict = true
+disallow_untyped_decorators = false
+
+[[tool.mypy.overrides]]
+module = [
+    "_pytest.*",
+    "pytest.*",
+]
+ignore_missing_imports = true
+
+
+[tool.pylint.messages_control]
+max-line-length = 100
+disable = [
+  "fixme",
+  "global-statement",
+  "invalid-name",
+  "missing-class-docstring",
+  "missing-function-docstring",
+  "missing-module-docstring",
+  "no-else-return",
+  "too-few-public-methods",
+  "unhashable-member",
+  "unused-argument",
+]
+
+[tool.taskipy.tasks]
+
+black_format = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXX black format XXXXXXXXXXXXXXXXXXXXXXXXX
+    black typedpath tests
+"""
+
+black_check = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXX black check XXXXXXXXXXXXXXXXXXXXXXXXX
+    black --check typedpath tests
+"""
+
+isort_format = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXX isort format XXXXXXXXXXXXXXXXXXXXXXXXX
+    isort typedpath tests
+"""
+
+isort_check = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXX isort check XXXXXXXXXXXXXXXXXXXXXXXXX
+    isort --check typedpath tests
+"""
+
+mypy = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXX mypy XXXXXXXXXXXXXXXXXXXXXXXXX
+    mypy typedpath tests
+"""
+
+pylint = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXX pylint XXXXXXXXXXXXXXXXXXXXXXXXX
+    pylint typedpath tests
+"""
+
+pytest = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXX pytest XXXXXXXXXXXXXXXXXXXXXXXXX
+    pytest tests
+"""
+
+format = """
+    task isort_format
+    task black_format
+"""
+
+lint = """
+    task isort_check \
+    && task black_check \
+    && task mypy \
+    && task pylint
+"""
+
+format_and_lint = """
+    task format
+    task lint
+"""
+
+test = """
+    task lint \
+    && task pytest
+"""
+
+format_and_test = """
+    task format \
+    && task test
+"""
