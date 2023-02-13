@@ -1,17 +1,17 @@
-from os import PathLike, fspath
+from os import PathLike
 from pathlib import Path
-from typing import Generic, TypeAlias
+from typing import TypeAlias, TypeVar
 
 K = TypeVar("K")
-PV = TypeVar("PV", bound=TypedPath)
+PV = TypeVar("PV", bound="TypedPath")
 
 
-PathLikeLike: TypeAlias = PathLike | str | bytes
+PathLikeLike: TypeAlias = PathLike[str] | str
 
 
 class TypedPath:
-    def __init__(path: PathLikeLike) -> None:
-        self._path = Path(fspath(path))
+    def __init__(self, path: PathLikeLike) -> None:
+        self._path = Path(path)
 
     def __str__(self) -> str:
         return str(self._path)
@@ -23,7 +23,7 @@ class TypedDir(TypedPath):
 
 class TypedFile(TypedPath):
     def read_path(self) -> Path:
-        assert self._path.isfile()
+        assert self._path.is_file()
         return self._path
 
     def write_path(self) -> Path:
@@ -35,16 +35,22 @@ class TypedFile(TypedPath):
 
 
 class TextFile(TypedFile):
-    def write(self, content: str) -> None:
-        self.write_path().write_text(content)
+    def write(
+        self,
+        data: str,
+        encoding: str | None = None,
+        errors: str | None = None,
+        newline: str | None = None,
+    ) -> int:
+        return self.write_path().write_text(data, encoding=encoding, errors=errors, newline=newline)
 
-    def read(self) -> str:
-        return self.read_path().read_text()
+    def read(self, encoding: str | None = None, errors: str | None = None) -> str:
+        return self.read_path().read_text(encoding=encoding, errors=errors)
 
 
 class BytesFile(TypedFile):
-    def write(self, content: bytes) -> None:
-        self.write_path().write_bytes(content)
+    def write(self, data: bytes) -> int:
+        return self.write_path().write_bytes(data)
 
     def read(self) -> bytes:
         return self.read_path().read_bytes()
