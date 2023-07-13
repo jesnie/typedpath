@@ -37,7 +37,8 @@ def test_bytes_file(tmp_path: Path) -> None:
     [
         (int, range(3)),
         (str, "abc"),
-        # (bool, [True, False]),  # TODO
+        (str, ["abc.def.ghi", "abc/def/ghi", "__/__s__/s/"]),
+        (bool, [True, False]),
         (float, [0.1, 6.28, 4.0]),
     ],
 )
@@ -51,19 +52,16 @@ def test_dict_dir__keys(key_type: Type[_K], keys: Sequence[_K], tmp_path: Path) 
     for k in keys:
         assert k not in d
 
-    for k in keys:
-        d[k].write(str(k))
+    test_dict = {k: str(i) for i, k in enumerate(keys)}
+    for k, v in test_dict.items():
+        d[k].write(v)
 
     assert d
     assert len(d) == len(keys)
 
     assert set(d.keys()) == set(keys)
-    assert len(d.values()) == len(keys)
-    for v in d.values():
-        assert key_type(v.read()) in keys  # type: ignore[call-arg]
-    assert len(d.items()) == len(keys)
-    for k, v in d.items():
-        assert k == key_type(v.read())  # type: ignore[call-arg]
+    assert set(v.read() for v in d.values()) == set(test_dict.values())
+    assert {k: v.read() for k, v in d.items()} == test_dict
     for k in keys:
         assert k in d
 
