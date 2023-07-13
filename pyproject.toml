@@ -2,31 +2,45 @@
 name = "typedpath"
 version = "0.1.0"
 description = "Use typed Python objects to represent files and directories."
-authors = ["Jesper Nielsen <jespernielsen1982+git@gmail.com>"]
+authors = ["Jesper Nielsen <jespernielsen1982+typedpath@gmail.com>"]
+license = "MIT"
 readme = "README.md"
+
+homepage = "https://github.com/jesnie/typedpath"
+repository = "https://github.com/jesnie/typedpath"
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Typing :: Typed",
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 
-
 [tool.poetry.group.dev.dependencies]
 black = ">= 23.0.0"
+isort = ">= 5.12.0"
 mypy = ">= 1.0.0"
 pylint = ">= 2.16.0"
-isort = ">= 5.12.0"
-taskipy = ">= 1.10.0"
 pytest = ">= 7.2.0"
+taskipy = ">= 1.10.0"
+toml = "^0.10.2"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
+py_version = 310
 profile = "black"
 
 [tool.black]
 line-length = 100
-target-version = ['py39']
+target-version = ['py310']
 
 [tool.mypy]
 python_version = "3.10"
@@ -39,6 +53,7 @@ disallow_untyped_decorators = false
 module = [
     "_pytest.*",
     "pytest.*",
+    "toml.*",
 ]
 ignore_missing_imports = true
 
@@ -59,65 +74,37 @@ disable = [
 ]
 
 [tool.taskipy.tasks]
-
-black_format = """
-    echo XXXXXXXXXXXXXXXXXXXXXXXXX black format XXXXXXXXXXXXXXXXXXXXXXXXX
-    black typedpath tests
+isort = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX isort XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    isort typedpath tests set_version.py
 """
-
-black_check = """
-    echo XXXXXXXXXXXXXXXXXXXXXXXXX black check XXXXXXXXXXXXXXXXXXXXXXXXX
-    black --check typedpath tests
-"""
-
-isort_format = """
-    echo XXXXXXXXXXXXXXXXXXXXXXXXX isort format XXXXXXXXXXXXXXXXXXXXXXXXX
-    isort typedpath tests
-"""
-
 isort_check = """
-    echo XXXXXXXXXXXXXXXXXXXXXXXXX isort check XXXXXXXXXXXXXXXXXXXXXXXXX
-    isort --check typedpath tests
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX isort XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    isort --check-only typedpath tests set_version.py
 """
-
+black = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX black XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    black typedpath tests set_version.py
+"""
+black_check = """
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX black XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    black --check typedpath tests set_version.py
+"""
 mypy = """
-    echo XXXXXXXXXXXXXXXXXXXXXXXXX mypy XXXXXXXXXXXXXXXXXXXXXXXXX
-    mypy typedpath tests
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX mypy XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    mypy typedpath tests set_version.py
 """
-
 pylint = """
-    echo XXXXXXXXXXXXXXXXXXXXXXXXX pylint XXXXXXXXXXXXXXXXXXXXXXXXX
-    pylint typedpath tests
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX pylint XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    pylint typedpath tests set_version.py
 """
-
 pytest = """
-    echo XXXXXXXXXXXXXXXXXXXXXXXXX pytest XXXXXXXXXXXXXXXXXXXXXXXXX
+    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX pytest XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     pytest tests
 """
 
-format = """
-    task isort_format
-    task black_format
-"""
-
-lint = """
-    task isort_check \
-    && task black_check \
-    && task mypy \
-    && task pylint
-"""
-
-format_and_lint = """
-    task format
-    task lint
-"""
-
-test = """
-    task lint \
-    && task pytest
-"""
-
-format_and_test = """
-    task format \
-    && task test
-"""
+format = "task isort && task black"
+format_check = "task isort_check && task black_check"
+lint = "task format_check && task mypy && task pylint"
+test = "task lint && task pytest"
+format_and_test = "task format && task mypy && task test"
