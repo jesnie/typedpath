@@ -2,7 +2,17 @@ from abc import ABC, abstractmethod
 from functools import singledispatch
 from os import PathLike
 from pathlib import Path
-from typing import Generic, Iterator, Mapping, Type, TypeAlias, TypeVar
+from typing import (
+    Generic,
+    Iterator,
+    Mapping,
+    Type,
+    TypeAlias,
+    TypeVar,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 _K = TypeVar("_K")
 _PV = TypeVar("_PV", bound="TypedPath")
@@ -156,7 +166,7 @@ class BoolKeyCodec(KeyCodec[bool]):
 
 @singledispatch
 def _codec_registry(key: _K) -> KeyCodec[_K]:
-    raise AssertionError(f"Not KeyCodec for object {key} of type {type(key)}")
+    raise AssertionError(f"No KeyCodec for object {key} of type {type(key)}")
 
 
 def get_key_codec(key_type: Type[_K]) -> KeyCodec[_K]:
@@ -169,3 +179,16 @@ def add_key_codec(key_type: Type[_K], codec: KeyCodec[_K]) -> None:
 
 add_key_codec(object, StrKeyCodec())
 add_key_codec(bool, BoolKeyCodec())
+
+
+class StructDir(TypedDir):
+    default_suffix = ""
+
+    def __init__(self, path: PathLikeLike) -> None:
+        super().__init__(path)
+
+        for name, member_type in get_type_hints(self).items():
+            origin_type = get_origin(member_type) or member_type
+            args = get_args(member_type)
+            member_path = self.pretty_path() / name
+            setattr(self, name, origin_type(member_path, *args))

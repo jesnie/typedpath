@@ -1,0 +1,10 @@
+* Pass more parameters to members.
+* Separation and testing of KeyCodec.
+* Numpy support.
+* Pandas support.
+* JSON support.
+  - Raw
+  - Typed
+* Pickle support.
+* Documentation.
+* Release.

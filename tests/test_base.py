@@ -3,7 +3,7 @@ from typing import Sequence, Type
 
 import pytest
 
-from typedpath.base import _K, BytesFile, DictDir, TextFile
+from typedpath.base import _K, BytesFile, DictDir, StructDir, TextFile
 
 
 def test_text_file(tmp_path: Path) -> None:
@@ -94,3 +94,27 @@ def test_dict_dir__bytes_file(tmp_path: Path) -> None:
         assert data[k] == v_.read()
     for k in data:
         assert k in d
+
+
+def test_struct_dir(tmp_path: Path) -> None:
+    class TestDir1(StructDir):
+        x: TextFile
+        y: BytesFile
+
+    class TestDir2(StructDir):
+        a: TestDir1
+        b: DictDir[int, TextFile]
+        c: DictDir[str, TestDir1]
+
+    d = TestDir2(tmp_path)
+    d.a.x.write("d.a.x")
+    d.a.y.write(b"d.a.y")
+    d.b[13].write("d.b[13]")
+    d.c["foo"].x.write('d.c["foo"].x')
+    d.c["foo"].y.write(b'd.c["foo"].y')
+
+    assert "d.a.x" == d.a.x.read()
+    assert b"d.a.y" == d.a.y.read()
+    assert "d.b[13]" == d.b[13].read()
+    assert 'd.c["foo"].x' == d.c["foo"].x.read()
+    assert b'd.c["foo"].y' == d.c["foo"].y.read()
