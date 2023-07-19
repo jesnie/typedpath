@@ -2,46 +2,45 @@ from abc import ABC, abstractmethod
 from functools import singledispatch
 from typing import Any, Generic, Type, TypeVar
 
-_K = TypeVar("_K")
+T = TypeVar("T")
 
 
-class KeyCodec(Generic[_K], ABC):
+class KeyCodec(Generic[T], ABC):
     @abstractmethod
-    def encode(self, key: _K) -> str:
+    def encode(self, key: T) -> str:
         ...
 
     @abstractmethod
-    def decode(self, key_str: str, key_type: Type[_K]) -> _K:
+    def decode(self, key_str: str, key_type: Type[T]) -> T:
         ...
+
+
+_ESCAPE_CHAR = "^"
+_ESCAPES = {
+    "h": _ESCAPE_CHAR,  # Must be first, to avoid escaping the escapings...
+    "s": "/",
+}
 
 
 class StrKeyCodec(KeyCodec[Any]):
-    ESCAPES = {
-        "h": "^",  # Must be first, to avoid escaping the escapings...
-        "s": "/",
-    }
+    def __init__(self, escape: bool = True) -> None:
+        self._escape = escape
 
     def encode(self, key: Any) -> str:
         key_str = str(key)
-        for escape_seq, seq in self.ESCAPES.items():
-            key_str = key_str.replace(seq, "^" + escape_seq)
+        if self._escape:
+            for escape_seq, seq in _ESCAPES.items():
+                key_str = key_str.replace(seq, _ESCAPE_CHAR + escape_seq)
         return key_str
 
     def decode(self, key_str: str, key_type: Type[Any]) -> Any:
-        in_tokens = key_str.split("^")
-        out_tokens = in_tokens[:1]
-        for in_token in in_tokens[1:]:
-            out_tokens.append(self.ESCAPES[in_token[0]])
-            out_tokens.append(in_token[1:])
-        key_str = "".join(out_tokens)
-        return key_type(key_str)
-
-
-class RawStrKeyCodec(KeyCodec[Any]):
-    def encode(self, key: Any) -> str:
-        return str(key)
-
-    def decode(self, key_str: str, key_type: Type[Any]) -> Any:
+        if self._escape:
+            in_tokens = key_str.split(_ESCAPE_CHAR)
+            out_tokens = in_tokens[:1]
+            for in_token in in_tokens[1:]:
+                out_tokens.append(_ESCAPES[in_token[0]])
+                out_tokens.append(in_token[1:])
+            key_str = "".join(out_tokens)
         return key_type(key_str)
 
 
@@ -60,15 +59,15 @@ class BoolKeyCodec(KeyCodec[bool]):
 
 
 @singledispatch
-def _codec_registry(key: _K) -> KeyCodec[_K]:
+def _codec_registry(key: T) -> KeyCodec[T]:
     raise AssertionError(f"No KeyCodec for object {key} of type {type(key)}")
 
 
-def get_key_codec(key_type: Type[_K]) -> KeyCodec[_K]:
+def get_key_codec(key_type: Type[T]) -> KeyCodec[T]:
     return _codec_registry.dispatch(key_type)()
 
 
-def add_key_codec(key_type: Type[_K], codec: KeyCodec[_K]) -> None:
+def add_key_codec(key_type: Type[T], codec: KeyCodec[T]) -> None:
     _codec_registry.register(key_type)(lambda: codec)
 
 
