@@ -1,10 +1,11 @@
-* Pass more parameters to members.
-* Separation and testing of KeyCodec.
+* Recursive dicts
+* Testing of KeyCodec.
 * Numpy support.
 * Pandas support.
 * JSON support.
   - Raw
   - Typed
 * Pickle support.
+* __init__.py
 * Documentation.
 * Release.

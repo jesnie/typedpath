@@ -1,8 +1,8 @@
-from abc import ABC, abstractmethod
-from functools import singledispatch
+from abc import ABC
 from os import PathLike
 from pathlib import Path
 from typing import (
+    Any,
     Generic,
     Iterator,
     Mapping,
@@ -13,6 +13,9 @@ from typing import (
     get_origin,
     get_type_hints,
 )
+
+from typedpath.args import Args, withargs
+from typedpath.key_codec import KeyCodec, get_key_codec
 
 _K = TypeVar("_K")
 _PV = TypeVar("_PV", bound="TypedPath")
@@ -50,6 +53,7 @@ class TextFile(TypedFile):
     def write(
         self,
         data: str,
+        *,
         encoding: str | None = None,
         errors: str | None = None,
         newline: str | None = None,
@@ -78,12 +82,23 @@ class TypedDir(TypedPath):
 class DictDir(TypedDir, Mapping[_K, _PV], Generic[_K, _PV]):
     default_suffix = ""
 
-    def __init__(self, path: PathLikeLike, key_type: Type[_K], value_type: Type[_PV]) -> None:
+    def __init__(
+        self,
+        path: PathLikeLike,
+        key_type: Type[_K],
+        value_type: Type[_PV],
+        *,
+        key_codec: KeyCodec[_K] | None = None,
+        allow_subdirs: bool = False,
+        value_args: Args = withargs(),
+    ) -> None:
         super().__init__(path)
 
         self._key_type = key_type
         self._value_type = value_type
-        self._codec = get_key_codec(self._key_type)
+        self._codec = key_codec or get_key_codec(self._key_type)
+        self._allow_subdirs = allow_subdirs
+        self._value_args = value_args
 
     def _key_to_path(self, key: _K) -> Path:
         key_str = self._codec.encode(key)
@@ -91,7 +106,8 @@ class DictDir(TypedDir, Mapping[_K, _PV], Generic[_K, _PV]):
         assert key_ == key, (
             "DictDir keys does not handle round-trip:" f" decodec(encode({key}))!={key_}."
         )
-        assert "/" not in key_str, f"DictDir keys cannot contain '/'. Key: {key_str}"
+        if not self._allow_subdirs:
+            assert "/" not in key_str, f"DictDir keys cannot contain '/'. Key: {key_str}"
         key_name = f"{key_str}{self._value_type.default_suffix}"
         return self._path / key_name
 
@@ -105,6 +121,7 @@ class DictDir(TypedDir, Mapping[_K, _PV], Generic[_K, _PV]):
         return self._value_type(item_path)
 
     def __iter__(self) -> Iterator[_K]:
+        assert not self._allow_subdirs, "__iter__ is not compatible with allow_subdirs=True."
         for item_path in self._path.iterdir():
             yield self._path_to_key(item_path)
 
@@ -114,80 +131,25 @@ class DictDir(TypedDir, Mapping[_K, _PV], Generic[_K, _PV]):
         return self._key_to_path(key).exists()
 
     def __len__(self) -> int:
+        assert not self._allow_subdirs, "__len__ is not compatible with allow_subdirs=True."
         return len(list(self._path.iterdir()))
-
-
-class KeyCodec(Generic[_K], ABC):
-    @abstractmethod
-    def encode(self, key: _K) -> str:
-        ...
-
-    @abstractmethod
-    def decode(self, key_str: str, key_type: Type[_K]) -> _K:
-        ...
-
-
-class StrKeyCodec(KeyCodec[object]):
-    ESCAPES = {
-        "u": "_",  # Must be first, to avoid escaping the escapings...
-        "s": "/",
-        "d": ".",
-    }
-
-    def encode(self, key: object) -> str:
-        key_str = str(key)
-        for escape_seq, seq in self.ESCAPES.items():
-            key_str = key_str.replace(seq, "_" + escape_seq)
-        return key_str
-
-    def decode(self, key_str: str, key_type: Type[object]) -> object:
-        in_tokens = key_str.split("_")
-        out_tokens = in_tokens[:1]
-        for in_token in in_tokens[1:]:
-            out_tokens.append(self.ESCAPES[in_token[0]])
-            out_tokens.append(in_token[1:])
-        key_str = "".join(out_tokens)
-        return key_type(key_str)  # type: ignore[call-arg]
-
-
-class BoolKeyCodec(KeyCodec[bool]):
-    def encode(self, key: bool) -> str:
-        return "True" if key else "False"
-
-    def decode(self, key_str: str, key_type: Type[object]) -> bool:
-        assert issubclass(key_type, bool), key_type
-        match key_str:
-            case "True":
-                return True
-            case "False":
-                return False
-        raise AssertionError(f"Don't know how to interpret {key_str} as a bool")
-
-
-@singledispatch
-def _codec_registry(key: _K) -> KeyCodec[_K]:
-    raise AssertionError(f"No KeyCodec for object {key} of type {type(key)}")
-
-
-def get_key_codec(key_type: Type[_K]) -> KeyCodec[_K]:
-    return _codec_registry.dispatch(key_type)()
-
-
-def add_key_codec(key_type: Type[_K], codec: KeyCodec[_K]) -> None:
-    _codec_registry.register(key_type)(lambda: codec)
-
-
-add_key_codec(object, StrKeyCodec())
-add_key_codec(bool, BoolKeyCodec())
 
 
 class StructDir(TypedDir):
     default_suffix = ""
 
-    def __init__(self, path: PathLikeLike) -> None:
+    def __init__(
+        self,
+        path: PathLikeLike,
+        globalns: Mapping[str, Any] | None = None,
+        localns: Mapping[str, Any] | None = None,
+    ) -> None:
         super().__init__(path)
 
-        for name, member_type in get_type_hints(self).items():
+        globalns_dict = dict(globalns) if globalns is not None else None
+        localns_dict = dict(localns) if localns is not None else None
+
+        for name, member_type in get_type_hints(self, globalns_dict, localns_dict).items():
             origin_type = get_origin(member_type) or member_type
             args = get_args(member_type)
             member_path = self.pretty_path() / name
