@@ -14,7 +14,7 @@ from typing import (
     get_type_hints,
 )
 
-from typedpath.args import Args, withargs
+from typedpath.args import NO_ARGS, Args
 from typedpath.key_codec import KeyCodec, get_key_codec
 
 _K = TypeVar("_K")
@@ -34,6 +34,12 @@ class TypedPath(ABC):
         return str(self._path)
 
 
+def _make(t: type[_PV], path: PathLikeLike, args: Args) -> _PV:
+    origin_type = get_origin(t) or t
+    type_args = get_args(t)
+    return origin_type(path, *type_args, **args.kwargs)
+
+
 class TypedFile(TypedPath):
     def read_path(self) -> Path:
         assert self._path.is_file()
@@ -50,18 +56,24 @@ class TypedFile(TypedPath):
 class TextFile(TypedFile):
     default_suffix = ".txt"
 
+    def __init__(self, path: PathLikeLike, *, encoding: str | None = None) -> None:
+        super().__init__(path)
+
+        self._encoding = encoding
+
     def write(
         self,
         data: str,
         *,
-        encoding: str | None = None,
         errors: str | None = None,
         newline: str | None = None,
     ) -> int:
-        return self.write_path().write_text(data, encoding=encoding, errors=errors, newline=newline)
+        return self.write_path().write_text(
+            data, encoding=self._encoding, errors=errors, newline=newline
+        )
 
-    def read(self, encoding: str | None = None, errors: str | None = None) -> str:
-        return self.read_path().read_text(encoding=encoding, errors=errors)
+    def read(self, errors: str | None = None) -> str:
+        return self.read_path().read_text(encoding=self._encoding, errors=errors)
 
 
 class BytesFile(TypedFile):
@@ -90,7 +102,7 @@ class DictDir(TypedDir, Mapping[_K, _PV], Generic[_K, _PV]):
         *,
         key_codec: KeyCodec[_K] | None = None,
         allow_subdirs: bool = False,
-        value_args: Args = withargs(),
+        value_args: Args = NO_ARGS,
     ) -> None:
         super().__init__(path)
 
@@ -104,8 +116,9 @@ class DictDir(TypedDir, Mapping[_K, _PV], Generic[_K, _PV]):
         key_str = self._codec.encode(key)
         key_ = self._codec.decode(key_str, self._key_type)
         assert key_ == key, (
-            "DictDir keys does not handle round-trip:" f" decodec(encode({key}))!={key_}."
+            "DictDir key did not handle round-trip:" f" decodec(encode({key}))={key_}."
         )
+        assert key_str, "DictDir keys cannot be empty."
         if not self._allow_subdirs:
             assert "/" not in key_str, f"DictDir keys cannot contain '/'. Key: {key_str}"
         key_name = f"{key_str}{self._value_type.default_suffix}"
@@ -113,12 +126,14 @@ class DictDir(TypedDir, Mapping[_K, _PV], Generic[_K, _PV]):
 
     def _path_to_key(self, path: Path) -> _K:
         key_name = path.name
-        key_str = key_name[: -len(self._value_type.default_suffix)]
+        expected_suffix = self._value_type.default_suffix
+        assert key_name.endswith(expected_suffix), f"{path} did not have suffix {expected_suffix}."
+        key_str = key_name.removesuffix(expected_suffix)
         return self._codec.decode(key_str, self._key_type)
 
     def __getitem__(self, key: _K) -> _PV:
         item_path = self._key_to_path(key)
-        return self._value_type(item_path)
+        return _make(self._value_type, item_path, self._value_args)
 
     def __iter__(self) -> Iterator[_K]:
         assert not self._allow_subdirs, "__iter__ is not compatible with allow_subdirs=True."
@@ -150,7 +165,7 @@ class StructDir(TypedDir):
         localns_dict = dict(localns) if localns is not None else None
 
         for name, member_type in get_type_hints(self, globalns_dict, localns_dict).items():
-            origin_type = get_origin(member_type) or member_type
-            args = get_args(member_type)
             member_path = self.pretty_path() / name
-            setattr(self, name, origin_type(member_path, *args))
+            args = getattr(self, name, NO_ARGS)
+            member: TypedPath = _make(member_type, member_path, args)
+            setattr(self, name, member)

@@ -68,6 +68,7 @@ disable = [
   "missing-function-docstring",
   "missing-module-docstring",
   "no-else-return",
+  "no-member",
   "too-few-public-methods",
   "unhashable-member",
   "unused-argument",
