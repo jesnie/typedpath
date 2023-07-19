@@ -3,7 +3,9 @@ from typing import Sequence, Type
 
 import pytest
 
+from typedpath.args import withargs
 from typedpath.base import _K, BytesFile, DictDir, StructDir, TextFile
+from typedpath.key_codec import RawStrKeyCodec
 
 
 def test_text_file(tmp_path: Path) -> None:
@@ -43,6 +45,7 @@ def test_bytes_file(tmp_path: Path) -> None:
     ],
 )
 def test_dict_dir__keys(key_type: Type[_K], keys: Sequence[_K], tmp_path: Path) -> None:
+    data = {k: str(i) for i, k in enumerate(keys)}
     d = DictDir(tmp_path, key_type, TextFile)
     assert not d
     assert len(d) == 0
@@ -52,18 +55,18 @@ def test_dict_dir__keys(key_type: Type[_K], keys: Sequence[_K], tmp_path: Path) 
     for k in keys:
         assert k not in d
 
-    test_dict = {k: str(i) for i, k in enumerate(keys)}
-    for k, v in test_dict.items():
+    for k, v in data.items():
         d[k].write(v)
 
     assert d
     assert len(d) == len(keys)
 
     assert set(d.keys()) == set(keys)
-    assert set(v.read() for v in d.values()) == set(test_dict.values())
-    assert {k: v.read() for k, v in d.items()} == test_dict
-    for k in keys:
+    assert set(v.read() for v in d.values()) == set(data.values())
+    assert {k: v.read() for k, v in d.items()} == data
+    for k, v in data.items():
         assert k in d
+        assert v == d[k].read()
 
 
 def test_dict_dir__bytes_file(tmp_path: Path) -> None:
@@ -92,8 +95,44 @@ def test_dict_dir__bytes_file(tmp_path: Path) -> None:
     assert len(d.items()) == len(data)
     for k, v_ in d.items():
         assert data[k] == v_.read()
-    for k in data:
+    for k, v in data.items():
         assert k in d
+        assert v == d[k].read()
+
+
+def test_dict_dir__subdirs(tmp_path: Path) -> None:
+    data = {
+        "a": b"1",
+        "a/b": b"2",
+        "a/b/c": b"3",
+        "a/b/d": b"4",
+    }
+    d = DictDir(tmp_path, str, BytesFile, key_codec=RawStrKeyCodec(), allow_subdirs=True)
+
+    with pytest.raises(AssertionError):
+        bool(d)
+
+    with pytest.raises(AssertionError):
+        len(d)
+
+    with pytest.raises(AssertionError):
+        next(iter(d.keys()))
+
+    with pytest.raises(AssertionError):
+        next(iter(d.values()))
+
+    with pytest.raises(AssertionError):
+        next(iter(d.items()))
+
+    for k in data:
+        assert k not in d
+
+    for k, v in data.items():
+        d[k].write(v)
+
+    for k, v in data.items():
+        assert k in d
+        assert v == d[k].read()
 
 
 def test_struct_dir(tmp_path: Path) -> None:
@@ -106,7 +145,7 @@ def test_struct_dir(tmp_path: Path) -> None:
         b: DictDir[int, TextFile]
         c: DictDir[str, TestDir1]
 
-    d = TestDir2(tmp_path)
+    d = TestDir2(tmp_path, globalns=globals(), localns=locals())
     d.a.x.write("d.a.x")
     d.a.y.write(b"d.a.y")
     d.b[13].write("d.b[13]")
@@ -118,3 +157,15 @@ def test_struct_dir(tmp_path: Path) -> None:
     assert "d.b[13]" == d.b[13].read()
     assert 'd.c["foo"].x' == d.c["foo"].x.read()
     assert b'd.c["foo"].y' == d.c["foo"].y.read()
+
+
+def test_struct_dir__withargs(tmp_path: Path) -> None:
+    class TestDir(StructDir):
+        a: DictDir[str, TextFile] = withargs(
+            key_codec=RawStrKeyCodec(), allow_subdirs=True, value_args=withargs(encoding="utf-8")
+        )
+
+    d = TestDir(tmp_path)
+    d.a["foo/bar"].write('d.a["foo/bar"]')
+
+    assert 'd.a["foo/bar"]' == d.a["foo/bar"].read()
