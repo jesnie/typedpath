@@ -17,19 +17,18 @@ class KeyCodec(Generic[_K], ABC):
 
 class StrKeyCodec(KeyCodec[Any]):
     ESCAPES = {
-        "u": "_",  # Must be first, to avoid escaping the escapings...
+        "h": "^",  # Must be first, to avoid escaping the escapings...
         "s": "/",
-        "d": ".",
     }
 
     def encode(self, key: Any) -> str:
         key_str = str(key)
         for escape_seq, seq in self.ESCAPES.items():
-            key_str = key_str.replace(seq, "_" + escape_seq)
+            key_str = key_str.replace(seq, "^" + escape_seq)
         return key_str
 
     def decode(self, key_str: str, key_type: Type[Any]) -> Any:
-        in_tokens = key_str.split("_")
+        in_tokens = key_str.split("^")
         out_tokens = in_tokens[:1]
         for in_token in in_tokens[1:]:
             out_tokens.append(self.ESCAPES[in_token[0]])

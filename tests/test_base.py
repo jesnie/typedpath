@@ -4,7 +4,15 @@ from typing import Sequence, Type
 import pytest
 
 from typedpath.args import withargs
-from typedpath.base import _K, BytesFile, DictDir, StructDir, TextFile
+from typedpath.base import (
+    _K,
+    BytesFile,
+    DictDir,
+    PathLikeLike,
+    StructDir,
+    TextFile,
+    TypedFile,
+)
 from typedpath.key_codec import RawStrKeyCodec
 
 
@@ -60,7 +68,6 @@ def test_dict_dir__keys(key_type: Type[_K], keys: Sequence[_K], tmp_path: Path) 
 
     assert d
     assert len(d) == len(keys)
-
     assert set(d.keys()) == set(keys)
     assert set(v.read() for v in d.values()) == set(data.values())
     assert {k: v.read() for k, v in d.items()} == data
@@ -89,7 +96,6 @@ def test_dict_dir__bytes_file(tmp_path: Path) -> None:
 
     assert d
     assert len(d) == len(data)
-
     assert set(d.keys()) == set(data)
     assert len(d.values()) == len(data)
     assert len(d.items()) == len(data)
@@ -98,6 +104,52 @@ def test_dict_dir__bytes_file(tmp_path: Path) -> None:
     for k, v in data.items():
         assert k in d
         assert v == d[k].read()
+
+
+def test_dict_dir__nested(tmp_path: Path) -> None:
+    data = {
+        1: {
+            "one": "11",
+            "two": "12",
+        },
+        2: {
+            "three": "23",
+            "four": "24",
+        },
+    }
+    d = DictDir(tmp_path, int, DictDir[str, TextFile])
+    assert not d
+    assert len(d) == 0
+    assert not d.keys()
+    assert not d.values()
+    assert not d.items()
+    for k in data:
+        assert k not in d
+
+    for k1, v1 in data.items():
+        for k2, v2 in v1.items():
+            d[k1][k2].write(v2)
+
+    assert d
+    assert len(d) == len(data)
+    assert set(d.keys()) == set(data)
+    assert len(d.values()) == len(data)
+    assert len(d.items()) == len(data)
+    for k1, v1_ in d.items():
+        for k2, v2_ in v1_.items():
+            assert data[k1][k2] == v2_.read()
+
+    for k1, v1 in data.items():
+        assert k1 in d
+        v1_ = d[k1]
+        assert v1_
+        assert len(v1_) == len(v1)
+        assert set(v1_.keys()) == set(v1)
+        assert len(v1_.values()) == len(v1)
+        assert len(v1_.items()) == len(v1)
+        for k2, v2 in v1.items():
+            assert k2 in v1_
+            assert v2 == v1_[k2].read()
 
 
 def test_dict_dir__subdirs(tmp_path: Path) -> None:
@@ -159,13 +211,22 @@ def test_struct_dir(tmp_path: Path) -> None:
     assert b'd.c["foo"].y' == d.c["foo"].y.read()
 
 
-def test_struct_dir__withargs(tmp_path: Path) -> None:
+def test_args(tmp_path: Path) -> None:
+    class ArgsFile(TypedFile):
+        default_suffix = ".txt"
+
+        def __init__(self, path: PathLikeLike, *, arg1: int, arg2: str) -> None:
+            super().__init__(path)
+
+            self.arg1 = arg1
+            self.arg2 = arg2
+
     class TestDir(StructDir):
-        a: DictDir[str, TextFile] = withargs(
-            key_codec=RawStrKeyCodec(), allow_subdirs=True, value_args=withargs(encoding="utf-8")
-        )
+        a: ArgsFile = withargs(arg1=1, arg2="foo")
+        b: DictDir[str, ArgsFile] = withargs(value_args=withargs(arg1=2, arg2="bar"))
 
     d = TestDir(tmp_path)
-    d.a["foo/bar"].write('d.a["foo/bar"]')
-
-    assert 'd.a["foo/bar"]' == d.a["foo/bar"].read()
+    assert 1 == d.a.arg1
+    assert "foo" == d.a.arg2
+    assert 2 == d.b["key"].arg1
+    assert "bar" == d.b["key"].arg2
