@@ -20,6 +20,11 @@ def test_struct_dir(tmp_path: Path) -> None:
     d.b.write("d.b")
     d.c.file.write("d.c")
 
+    assert (tmp_path / "a/x.test").exists()
+    assert (tmp_path / "a/y/file.test").exists()
+    assert (tmp_path / "b.test").exists()
+    assert (tmp_path / "c/file.test").exists()
+
     assert "d.a.x" == d.a.x.read()
     assert "d.a.y" == d.a.y.file.read()
     assert "d.b" == d.b.read()

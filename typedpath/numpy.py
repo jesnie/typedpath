@@ -18,9 +18,16 @@ AnyNDArray = np.ndarray[Any, Any]
 
 
 class NpyFile(TypedFile):
+    """A file containing an (uncompressed) NumPy Array."""
+
     default_suffix = ".npy"
 
     def __init__(self, path: PathLikeLike, *, allow_pickle: bool = False) -> None:
+        """
+        :param path: Path this object refers to on disk.
+        :param allow_pickle: If `True` contents of arrays of `object`s are pickled. If `False`
+            arrays of `object`s cannot be stored.
+        """
         super().__init__(path)
         assert (
             NUMPY_AVAILABLE
@@ -41,9 +48,16 @@ class NpyFile(TypedFile):
 
 
 class NpzFile(TypedFile):
+    """A file containing a compressed NumPy Array."""
+
     default_suffix = ".npz"
 
     def __init__(self, path: PathLikeLike, *, allow_pickle: bool = False) -> None:
+        """
+        :param path: Path this object refers to on disk.
+        :param allow_pickle: If `True` contents of arrays of `object`s are pickled. If `False`
+            arrays of `object`s cannot be stored.
+        """
         super().__init__(path)
         assert (
             NUMPY_AVAILABLE
