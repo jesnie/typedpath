@@ -4,7 +4,7 @@ from typedpath.base import PathLikeLike, TypedFile
 class TextFile(TypedFile):
     default_suffix = ".txt"
 
-    def __init__(self, path: PathLikeLike, *, encoding: str | None = None) -> None:
+    def __init__(self, path: PathLikeLike, *, encoding: str = "utf-8") -> None:
         super().__init__(path)
 
         self._encoding = encoding

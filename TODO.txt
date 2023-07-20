@@ -1,6 +1,2 @@
-* Numpy support.
-* Pandas support.
-* JSON support.
-* Pickle support.
 * Documentation.
 * Release.
