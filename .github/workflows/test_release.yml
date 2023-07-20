@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: curl -sSL https://install.python-poetry.org | python3 -
-      - run: poetry install
+      - run: poetry install --all-extras
       - run: poetry run task test
 
   all-tests:
