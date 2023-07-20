@@ -2,6 +2,8 @@ from typedpath.base import PathLikeLike, TypedFile
 
 
 class TextFile(TypedFile):
+    """A file containing text."""
+
     default_suffix = ".txt"
 
     def __init__(self, path: PathLikeLike, *, encoding: str = "utf-8") -> None:
