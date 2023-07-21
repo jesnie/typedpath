@@ -4,9 +4,9 @@ from typing import Sequence
 
 import pytest
 
-from typedpath import JSONFile, ReadOnlyJSON
+from typedpath import JSON, JSONFile
 
-_DATA: Sequence[ReadOnlyJSON] = [
+_DATA: Sequence[JSON] = [
     42,
     6.28,
     "foo",
@@ -24,7 +24,7 @@ _DATA: Sequence[ReadOnlyJSON] = [
 
 
 @pytest.mark.parametrize("data", _DATA)
-def test_json_file(tmp_path: Path, data: ReadOnlyJSON) -> None:
+def test_json_file(tmp_path: Path, data: JSON) -> None:
     d = tmp_path / "dir"
     assert not d.exists()
     p = d / "test.json"

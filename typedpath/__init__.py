@@ -37,7 +37,7 @@ from typedpath.args import NO_ARGS, Args, withargs
 from typedpath.base import PathLikeLike, TypedDir, TypedFile, TypedPath
 from typedpath.bytes import BytesFile
 from typedpath.dict import DictDir
-from typedpath.json import JSON, JSONFile, ReadOnlyJSON
+from typedpath.json import JSON, JSONFile, MutableJSON
 from typedpath.keycodec import (
     BoolKeyCodec,
     KeyCodec,
@@ -60,6 +60,7 @@ __all__ = [
     "JSON",
     "JSONFile",
     "KeyCodec",
+    "MutableJSON",
     "NO_ARGS",
     "NpyFile",
     "NpzFile",
@@ -68,7 +69,6 @@ __all__ = [
     "PandasParquetFile",
     "PathLikeLike",
     "PickleFile",
-    "ReadOnlyJSON",
     "StrKeyCodec",
     "StructDir",
     "TextFile",
