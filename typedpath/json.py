@@ -1,12 +1,11 @@
 import json
-from typing import Any, Mapping, Sequence
+from typing import Any, Mapping, Sequence, TypeAlias
 
 from typedpath.base import PathLikeLike, TypedFile
 
-ReadOnlyJSON = (
-    int | float | bool | str | None | Sequence["ReadOnlyJSON"] | Mapping[str, "ReadOnlyJSON"]
-)
-JSON = int | float | bool | str | None | list["JSON"] | dict[str, "JSON"]
+JSONPrimitive: TypeAlias = int | float | bool | str | None
+JSON = JSONPrimitive | Sequence["JSON"] | Mapping[str, "JSON"]
+MutableJSON = JSONPrimitive | list["MutableJSON"] | dict[str, "MutableJSON"]
 
 
 class JSONFile(TypedFile):
@@ -19,7 +18,7 @@ class JSONFile(TypedFile):
 
         self._encoding = encoding
 
-    def write(self, data: ReadOnlyJSON, **kwargs: Any) -> None:
+    def write(self, data: JSON, **kwargs: Any) -> None:
         """
         Sets the contents of this file.
 
@@ -28,7 +27,7 @@ class JSONFile(TypedFile):
         with open(self.write_path(), "wt", encoding=self._encoding) as fp:
             json.dump(data, fp, **kwargs)
 
-    def read(self, **kwargs: Any) -> JSON:
+    def read(self, **kwargs: Any) -> MutableJSON:
         """
         Gets the contents of this file.
 
