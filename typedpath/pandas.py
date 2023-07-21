@@ -15,6 +15,8 @@ except ImportError:
 
 
 class PandasCsvFile(TypedFile):
+    """A file containing comma separated values (CSV)."""
+
     default_suffix = ".csv"
 
     def __init__(self, path: PathLikeLike, *, encoding: str = "utf-8") -> None:
@@ -41,6 +43,8 @@ class PandasCsvFile(TypedFile):
 
 
 class PandasFeatherFile(TypedFile):
+    """A file containing data in the Apache Arrow Feather format."""
+
     default_suffix = ".feather"
 
     def __init__(self, path: PathLikeLike) -> None:
@@ -61,6 +65,8 @@ ParquetCompression: TypeAlias = Literal["snappy", "gzip", "brotli", None]
 
 
 class PandasParquetFile(TypedFile):
+    """A file containing data in the Apache Parquet format."""
+
     default_suffix = ".parquet"
 
     def __init__(

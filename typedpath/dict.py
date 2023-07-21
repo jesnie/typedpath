@@ -11,6 +11,22 @@ TP = TypeVar("TP", bound=TypedPath)
 
 
 class DictDir(TypedDir, Mapping[K, TP], Generic[K, TP]):
+    """
+    A directory mapping names to files.
+
+    When creating a `DictDir` you must define the types of the keys and values::
+
+        people = tp.DictDir("people", str, Person)
+
+    The keys must be a value that can be mapped to a file-name, the keys must be subclasses of
+    `TypedPath` themselves.
+
+    By default a key `x`, of type `X` is converted to a filename using `str(x)`, and converted back
+    to an object again using `X(s)`. You can override this behaviour by implementing the `KeyCodec`
+    interface, and either passing an instance when creating the `DictDir`, or registering your codec
+    with `add_key_codec`.
+    """
+
     default_suffix = ""
 
     def __init__(
@@ -23,6 +39,20 @@ class DictDir(TypedDir, Mapping[K, TP], Generic[K, TP]):
         allow_subdirs: bool = False,
         value_args: Args = NO_ARGS,
     ) -> None:
+        """
+        :param path: Path this object refers to on disk.
+        :param key_type: The type of the keys in this dictionary. Must be convertible to a filename,
+            using a `KeyCodec`.
+        :param value_type: The type of the values in this dictionary. Must be a subclass of
+            `TypedPath`.
+        :param key_codec: The codec to use to convert keys to/from `str`s. If unset
+            `get_key_codec(key_type)` is used.
+        :param allow_subdirs: Whether to allow the `/` character in keys. Using a `/` character in a
+            key will implicitly create new subdirectores. If `True` the `DictDir` can no longer
+            search the disk for values that have already been created, severely limiting the
+            functionality of the instance.
+        :param value_args: Arguments to use when creating instances of the `value_type`.
+        """
         super().__init__(path)
 
         self._key_type = key_type
