@@ -22,8 +22,24 @@ jobs:
       - run: poetry install --all-extras
       - run: poetry run task test
 
+  test-install:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10", "3.11"]
+
+    name: test-install-${{ matrix.python }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      - run: curl -sSL https://install.python-poetry.org | python3 -
+      - run: poetry install --only main
+      - run: poetry run python -c "import typedpath"
+
   all-tests:
-    needs: [tests]
+    needs: [tests, test-install]
     runs-on: ubuntu-latest
     steps:
       - run: echo ok
@@ -41,7 +57,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.10"
       - run: curl -sSL https://install.python-poetry.org | python3 -
       - run: poetry install
       - run: poetry run python set_version.py "${{github.ref_name}}"
