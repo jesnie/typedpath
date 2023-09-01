@@ -12,28 +12,29 @@ repository = "https://github.com/jesnie/typedpath"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+    "Typing :: Typed",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Typing :: Typed",
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+numpy = {version = "<2,>=1.23.0", optional = true}
+pandas = {version = "<3,>=1.4.0", optional = true}
+pyarrow = {version = "<14,>=9.0.0", optional = true}
+python = "<4,>=3.10"
 
-numpy = { version = "^1.22", optional = true }
-pandas = { version = "^2.0.0", optional = true }
-pyarrow = { version = "^12.0.0", optional = true }
 
 [tool.poetry.group.dev.dependencies]
-black = ">= 23.0.0"
-isort = ">= 5.12.0"
-mypy = ">= 1.0.0"
-pandas-stubs = "^2.0.0"
-pylint = ">= 2.16.0"
-pytest = ">= 7.2.0"
-taskipy = ">= 1.10.0"
-toml = "^0.10.2"
+black = "<23.8,>=23.7"
+compreq = "<0.2.1,>=0.2.0"
+isort = "<5.13,>=5.12"
+mypy = "<1.6,>=1.5"
+pandas-stubs = "<3,>=1.4"
+pylint = "<2.18,>=2.17"
+pytest = "<7.5,>=7.4"
+taskipy = "<1.13,>=1.12"
+tomlkit = "<0.12.2,>=0.12.1"
 
 [tool.poetry.extras]
 numpy = ["numpy"]
@@ -49,7 +50,7 @@ profile = "black"
 
 [tool.black]
 line-length = 100
-target-version = ['py310']
+target-version = ["py310"]
 
 [tool.mypy]
 python_version = "3.10"
@@ -62,7 +63,6 @@ disallow_untyped_decorators = false
 module = [
     "_pytest.*",
     "pytest.*",
-    "toml.*",
 ]
 ignore_missing_imports = true
 
@@ -87,27 +87,27 @@ disable = [
 [tool.taskipy.tasks]
 isort = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX isort XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    isort typedpath tests set_version.py
+    isort typedpath tests set_version.py requirements.py
 """
 isort_check = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX isort XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    isort --check-only typedpath tests set_version.py
+    isort --check-only typedpath tests set_version.py requirements.py
 """
 black = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX black XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    black typedpath tests set_version.py
+    black typedpath tests set_version.py requirements.py
 """
 black_check = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX black XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    black --check typedpath tests set_version.py
+    black --check typedpath tests set_version.py requirements.py
 """
 mypy = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX mypy XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    mypy typedpath tests set_version.py
+    mypy typedpath tests set_version.py requirements.py
 """
 pylint = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX pylint XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    pylint typedpath tests set_version.py
+    pylint typedpath tests set_version.py requirements.py
 """
 pytest = """
     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX pytest XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
