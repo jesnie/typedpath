@@ -58,13 +58,13 @@ def main() -> None:
             "<", cr.ceil_ver(cr.REL_MINOR, cr.max_ver())
         )
 
+        extra_optionals = ["numpy", "pandas", "pyarrow"]
+
         pyproject.set_requirements(
             comp_req,
             cr.consistent_lower_bounds(
                 [
-                    cr.dist("numpy") & cr.optional() & default_range,
-                    cr.dist("pandas") & cr.optional() & default_range,
-                    cr.dist("pyarrow") & cr.optional() & default_range,
+                    *[cr.dist(eo) & cr.optional() & default_range for eo in extra_optionals],
                     cr.dist("python") & cr.python_specifier(),
                 ],
             ),
@@ -72,6 +72,7 @@ def main() -> None:
         pyproject.set_requirements(
             comp_req,
             [
+                *[cr.dist(eo) & default_range for eo in extra_optionals],
                 cr.dist("black") & dev_range,
                 cr.dist("compreq") & dev_range,
                 cr.dist("isort") & dev_range,

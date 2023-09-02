@@ -51,6 +51,8 @@ from typedpath.pickle import PickleFile
 from typedpath.struct import StructDir
 from typedpath.text import TextFile
 
+__version__ = "0.1.0"
+
 __all__ = [
     "AnyNDArray",
     "Args",
@@ -75,6 +77,7 @@ __all__ = [
     "TypedDir",
     "TypedFile",
     "TypedPath",
+    "__version__",
     "add_key_codec",
     "get_key_codec",
     "withargs",
