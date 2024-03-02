@@ -1,13 +1,15 @@
 #!/bin/env bash
 
+branch=compreq
+
 set -xe
 
 git fetch origin main
 git checkout main
 git pull --rebase origin main
-if ! git checkout -b typedpath; then
-    git branch -D typedpath
-    git checkout -b typedpath
+if ! git checkout -b ${branch}; then
+    git branch -D ${branch}
+    git checkout -b ${branch}
 fi
 poetry run python -m requirements
 if [[ $(git status --porcelain) ]]; then
@@ -17,11 +19,10 @@ if [[ $(git status --porcelain) ]]; then
         -c "user.email=none" \
         commit \
         -am "Update requirements."
-    git push origin +typedpath
+    git push origin +${branch}
     gh pr create \
        --title "Update requirements" \
        --body "Automatic update of requirements." \
        --reviewer jesnie \
        || true
-    gh pr merge -s --auto
 fi
