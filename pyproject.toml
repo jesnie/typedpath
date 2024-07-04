@@ -20,25 +20,25 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-numpy = {version = "<2,>=1.24.0", optional = true}
-pandas = {version = "<3,>=1.5.0", optional = true}
-pyarrow = {version = "<16,>=11.0.0", optional = true}
+numpy = {version = "<3,>=1.25.0", optional = true}
+pandas = {version = "<3,>=2.0.0", optional = true}
+pyarrow = {version = "<17,>=12.0.0", optional = true}
 python = "<4,>=3.10"
 
 
 [tool.poetry.group.dev.dependencies]
-black = "<24.3,>=24.2"
+black = "<24.5,>=24.4"
 compreq = "<0.3.1,>=0.3.0"
 isort = "<5.14,>=5.13"
-mypy = "<1.9,>=1.8"
-numpy = "<2,>=1.24"
-pandas = "<3,>=1.5"
-pandas-stubs = "<3,>=1.5"
-pyarrow = "<16,>=11.0"
-pylint = "<3.2,>=3.1"
-pytest = "<8.1,>=8.0"
-taskipy = "<1.13,>=1.12"
-tomlkit = "<0.12.4,>=0.12.3"
+mypy = "<1.11,>=1.10"
+numpy = "<3,>=1.25"
+pandas = "<3,>=2.0"
+pandas-stubs = "<3,>=2.0"
+pyarrow = "<17,>=12.0"
+pylint = "<3.3,>=3.2"
+pytest = "<8.3,>=8.2"
+taskipy = "<1.14,>=1.13"
+tomlkit = "<0.12.6,>=0.12.5"
 
 [tool.poetry.extras]
 numpy = ["numpy"]
