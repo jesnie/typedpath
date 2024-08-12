@@ -22,23 +22,23 @@ classifiers = [
 [tool.poetry.dependencies]
 numpy = {version = "<3,>=1.25.0", optional = true}
 pandas = {version = "<3,>=2.0.0", optional = true}
-pyarrow = {version = "<17,>=12.0.0", optional = true}
+pyarrow = {version = "<18,>=12.0.0", optional = true}
 python = "<4,>=3.10"
 
 
 [tool.poetry.group.dev.dependencies]
-black = "<24.5,>=24.4"
-compreq = "<0.3.1,>=0.3.0"
+black = "<24.9,>=24.8"
+compreq = "<0.3.2,>=0.3.1"
 isort = "<5.14,>=5.13"
-mypy = "<1.11,>=1.10"
+mypy = "<1.12,>=1.11"
 numpy = "<3,>=1.25"
 pandas = "<3,>=2.0"
 pandas-stubs = "<3,>=2.0"
-pyarrow = "<17,>=12.0"
+pyarrow = "<18,>=12.0"
 pylint = "<3.3,>=3.2"
-pytest = "<8.3,>=8.2"
+pytest = "<8.4,>=8.3"
 taskipy = "<1.14,>=1.13"
-tomlkit = "<0.12.6,>=0.12.5"
+tomlkit = "<0.13.1,>=0.13.0"
 
 [tool.poetry.extras]
 numpy = ["numpy"]
