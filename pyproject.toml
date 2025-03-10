@@ -23,19 +23,19 @@ classifiers = [
 [tool.poetry.dependencies]
 numpy = {version = "<3,>=1.26.0", optional = true}
 pandas = {version = "<3,>=2.0.0", optional = true}
-pyarrow = {version = "<19,>=14.0.0", optional = true}
+pyarrow = {version = "<20,>=15.0.0", optional = true}
 python = "<4,>=3.10"
 
 
 [tool.poetry.group.dev.dependencies]
-black = "<24.11,>=24.10"
+black = "<25.2,>=25.1"
 compreq = "<0.3.2,>=0.3.1"
-isort = "<5.14,>=5.13"
-mypy = "<1.15,>=1.14"
+isort = "<6.1,>=6.0"
+mypy = "<1.16,>=1.15"
 numpy = "<3,>=1.26"
 pandas = "<3,>=2.0"
 pandas-stubs = "<3,>=2.0"
-pyarrow = "<19,>=14.0"
+pyarrow = "<20,>=15.0"
 pylint = "<3.4,>=3.3"
 pytest = "<8.4,>=8.3"
 taskipy = "<1.15,>=1.14"
