@@ -1,4 +1,4 @@
-from typing import Any, Generic, Type, TypeVar
+from typing import Any, Generic, TypeVar
 
 from typedpath import PathLikeLike, TypedDir, TypedFile
 
@@ -23,7 +23,7 @@ class TestFile(TypedFile):
 class TestGenericDir(TypedDir, Generic[T, U]):
     default_suffix = ""
 
-    def __init__(self, path: PathLikeLike, t: Type[T], u: Type[U], **kwargs: Any) -> None:
+    def __init__(self, path: PathLikeLike, t: type[T], u: type[U], **kwargs: Any) -> None:
         super().__init__(path)
         self.t = t
         self.u = u

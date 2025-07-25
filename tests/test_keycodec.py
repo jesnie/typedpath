@@ -1,3 +1,4 @@
+# ruff: noqa: ERA001
 from pathlib import Path
 from typing import TypeVar
 

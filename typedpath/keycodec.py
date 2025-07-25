@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import singledispatch
-from typing import Any, Generic, Type, TypeVar
+from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
 
@@ -15,7 +15,7 @@ class KeyCodec(Generic[T], ABC):
         """Create a string from an object."""
 
     @abstractmethod
-    def decode(self, key_str: str, key_type: Type[T]) -> T:
+    def decode(self, key_str: str, key_type: type[T]) -> T:
         """
         Create an object from a string.
 
@@ -55,7 +55,7 @@ class StrKeyCodec(KeyCodec[Any]):
                 key_str = key_str.replace(seq, _ESCAPE_CHAR + escape_seq)
         return key_str
 
-    def decode(self, key_str: str, key_type: Type[Any]) -> Any:
+    def decode(self, key_str: str, key_type: type[Any]) -> Any:
         if self._escape:
             in_tokens = key_str.split(_ESCAPE_CHAR)
             out_tokens = in_tokens[:1]
@@ -74,7 +74,7 @@ class BoolKeyCodec(KeyCodec[bool]):
     def encode(self, key: bool) -> str:
         return "True" if key else "False"
 
-    def decode(self, key_str: str, key_type: Type[bool]) -> bool:
+    def decode(self, key_str: str, key_type: type[bool]) -> bool:
         assert issubclass(key_type, bool), key_type
         match key_str:
             case "True":
@@ -89,7 +89,7 @@ def _codec_registry(key: T) -> KeyCodec[T]:
     raise AssertionError(f"No KeyCodec for object {key} of type {type(key)}")
 
 
-def get_key_codec(key_type: Type[T]) -> KeyCodec[T]:
+def get_key_codec(key_type: type[T]) -> KeyCodec[T]:
     """
     Get a `KeyCodec` for the given type of key.
 
@@ -99,7 +99,7 @@ def get_key_codec(key_type: Type[T]) -> KeyCodec[T]:
     return _codec_registry.dispatch(key_type)()
 
 
-def add_key_codec(key_type: Type[T], codec: KeyCodec[T]) -> None:
+def add_key_codec(key_type: type[T], codec: KeyCodec[T]) -> None:
     """
     Register a `KeyCodec` for the given type.
     """

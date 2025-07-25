@@ -24,9 +24,9 @@ class TypedPath(ABC):
         """
         :param path: Path this object refers to on disk.
         """
-        assert self.default_suffix == "" or self.default_suffix.startswith(
-            "."
-        ), f"Default suffix should be empty or start with '.'. Found: {self.default_suffix}"
+        assert self.default_suffix == "" or self.default_suffix.startswith("."), (
+            f"Default suffix should be empty or start with '.'. Found: {self.default_suffix}"
+        )
         self._path = Path(path)
 
     def __str__(self) -> str:

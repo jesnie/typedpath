@@ -29,12 +29,12 @@ class NpyFile(TypedFile):
             arrays of `object`s cannot be stored.
         """
         super().__init__(path)
-        assert (
-            NUMPY_AVAILABLE
-        ), "NumPy does not appear to be installed on this system. Try: pip install numpy"
-        assert (
-            self.pretty_path().suffix == self.default_suffix
-        ), "NumPy requires file to have suffix '{self.default_suffix}'. File: {self.pretty_path()}"
+        assert NUMPY_AVAILABLE, (
+            "NumPy does not appear to be installed on this system. Try: pip install numpy"
+        )
+        assert self.pretty_path().suffix == self.default_suffix, (
+            "NumPy requires file to have suffix '{self.default_suffix}'. File: {self.pretty_path()}"
+        )
 
         self._allow_pickle = allow_pickle
 
@@ -59,12 +59,12 @@ class NpzFile(TypedFile):
             arrays of `object`s cannot be stored.
         """
         super().__init__(path)
-        assert (
-            NUMPY_AVAILABLE
-        ), "NumPy does not appear to be installed on this system. Try: pip install numpy"
-        assert (
-            self.pretty_path().suffix == self.default_suffix
-        ), "NumPy requires file to have suffix '{self.default_suffix}'. File: {self.pretty_path()}"
+        assert NUMPY_AVAILABLE, (
+            "NumPy does not appear to be installed on this system. Try: pip install numpy"
+        )
+        assert self.pretty_path().suffix == self.default_suffix, (
+            "NumPy requires file to have suffix '{self.default_suffix}'. File: {self.pretty_path()}"
+        )
 
         self._allow_pickle = allow_pickle
 

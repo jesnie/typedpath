@@ -1,6 +1,9 @@
+# ruff: noqa: S301
+
 import pickle
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence, TypeVar
+from typing import Any, TypeVar
 
 import pytest
 

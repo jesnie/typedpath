@@ -1,5 +1,8 @@
+# ruff: noqa: ERA001
+
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Final, Mapping
+from typing import Any, Final
 
 
 @dataclass(frozen=True)

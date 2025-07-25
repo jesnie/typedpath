@@ -1,5 +1,6 @@
 import json
-from typing import Any, Mapping, Sequence, TypeAlias
+from collections.abc import Mapping, Sequence
+from typing import Any, TypeAlias
 
 from typedpath.base import PathLikeLike, TypedFile
 

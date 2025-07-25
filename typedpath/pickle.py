@@ -1,5 +1,6 @@
+# ruff: noqa: S301
 import pickle
-from typing import Any, Generic, Type, TypeVar, get_origin
+from typing import Any, Generic, TypeVar, get_origin
 
 from typedpath.base import PathLikeLike, TypedFile
 
@@ -11,7 +12,7 @@ class PickleFile(TypedFile, Generic[T]):
 
     default_suffix = ".pickle"
 
-    def __init__(self, path: PathLikeLike, value_type: Type[T]) -> None:
+    def __init__(self, path: PathLikeLike, value_type: type[T]) -> None:
         super().__init__(path)
 
         self._value_type = value_type
