@@ -25,10 +25,10 @@ def test_struct_dir(tmp_path: Path) -> None:
     assert (tmp_path / "b.test").exists()
     assert (tmp_path / "c/file.test").exists()
 
-    assert "d.a.x" == d.a.x.read()
-    assert "d.a.y" == d.a.y.file.read()
-    assert "d.b" == d.b.read()
-    assert "d.c" == d.c.file.read()
+    assert d.a.x.read() == "d.a.x"
+    assert d.a.y.file.read() == "d.a.y"
+    assert d.b.read() == "d.b"
+    assert d.c.file.read() == "d.c"
 
 
 def test_struct_dir__args(tmp_path: Path) -> None:
@@ -37,7 +37,7 @@ def test_struct_dir__args(tmp_path: Path) -> None:
         b: TestGenericDir[str, TestFile] = withargs(arg1=21, arg2=22)
 
     d = TestDir(tmp_path)
-    assert {"arg1": 11, "arg2": 12} == d.a.kwargs
-    assert str == d.b.t
+    assert d.a.kwargs == {"arg1": 11, "arg2": 12}
+    assert str is d.b.t
     assert TestFile == d.b.u
-    assert {"arg1": 21, "arg2": 22} == d.b.kwargs
+    assert d.b.kwargs == {"arg1": 21, "arg2": 22}

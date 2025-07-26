@@ -21,9 +21,9 @@ class PandasCsvFile(TypedFile):
 
     def __init__(self, path: PathLikeLike, *, encoding: str = "utf-8") -> None:
         super().__init__(path)
-        assert (
-            PANDAS_AVAILABLE
-        ), "Pandas does not appear to be installed on this system. Try: pip install pandas"
+        assert PANDAS_AVAILABLE, (
+            "Pandas does not appear to be installed on this system. Try: pip install pandas"
+        )
 
         self._encoding = encoding
 
@@ -49,9 +49,9 @@ class PandasFeatherFile(TypedFile):
 
     def __init__(self, path: PathLikeLike) -> None:
         super().__init__(path)
-        assert (
-            PANDAS_AVAILABLE
-        ), "Pandas does not appear to be installed on this system. Try: pip install pandas"
+        assert PANDAS_AVAILABLE, (
+            "Pandas does not appear to be installed on this system. Try: pip install pandas"
+        )
 
     def write(self, data: pd.DataFrame) -> None:
         data.to_feather(self.write_path())
@@ -77,9 +77,9 @@ class PandasParquetFile(TypedFile):
         compression: ParquetCompression = "snappy",
     ) -> None:
         super().__init__(path)
-        assert (
-            PANDAS_AVAILABLE
-        ), "Pandas does not appear to be installed on this system. Try: pip install pandas"
+        assert PANDAS_AVAILABLE, (
+            "Pandas does not appear to be installed on this system. Try: pip install pandas"
+        )
 
         self._engine = engine
         self._compression = compression

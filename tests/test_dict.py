@@ -1,5 +1,6 @@
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence, Type
+from typing import Any
 
 import pytest
 
@@ -17,7 +18,7 @@ from typedpath import DictDir, StrKeyCodec, withargs
         (float, [0.1, 6.28, 4.0]),
     ],
 )
-def test_dict_dir__keys(key_type: Type[Any], keys: Sequence[Any], tmp_path: Path) -> None:
+def test_dict_dir__keys(key_type: type[Any], keys: Sequence[Any], tmp_path: Path) -> None:
     data = {k: str(i) for i, k in enumerate(keys)}
     d = DictDir(tmp_path, key_type, TestFile)
     assert not d
@@ -34,7 +35,7 @@ def test_dict_dir__keys(key_type: Type[Any], keys: Sequence[Any], tmp_path: Path
     assert d
     assert len(d) == len(keys)
     assert set(d.keys()) == set(keys)
-    assert set(v.read() for v in d.values()) == set(data.values())
+    assert {v.read() for v in d.values()} == set(data.values())
     assert {k: v.read() for k, v in d.items()} == data
     for k, v in data.items():
         assert k in d
@@ -124,9 +125,9 @@ def test_dict_dir__subdirs(tmp_path: Path) -> None:
 
 def test_dict_dir__args(tmp_path: Path) -> None:
     d1 = DictDir(tmp_path / "1", str, TestFile, value_args=withargs(foo=1, bar=2))
-    assert {"foo": 1, "bar": 2} == d1["test"].kwargs
+    assert d1["test"].kwargs == {"foo": 1, "bar": 2}
 
     d2 = DictDir(tmp_path / "2", str, TestGenericDir[int, str], value_args=withargs(foo=1, bar=2))
-    assert int == d2["test"].t
-    assert str == d2["test"].u
-    assert {"foo": 1, "bar": 2} == d2["test"].kwargs
+    assert int is d2["test"].t
+    assert str is d2["test"].u
+    assert d2["test"].kwargs == {"foo": 1, "bar": 2}

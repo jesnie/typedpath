@@ -1,4 +1,5 @@
-from typing import Any, Mapping, get_type_hints
+from collections.abc import Mapping
+from typing import Any, get_type_hints
 
 from typedpath.args import NO_ARGS
 from typedpath.base import PathLikeLike, TypedDir, TypedPath

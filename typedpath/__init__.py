@@ -26,8 +26,8 @@ Creates::
     database/
     └── people
         ├── alice
-        │   ├── config.json
-        │   └── name.txt
+        │   ├── config.json
+        │   └── name.txt
         └── bob
             ├── config.json
             └── name.txt
@@ -54,16 +54,16 @@ from typedpath.text import TextFile
 __version__ = "0.1.0"
 
 __all__ = [
+    "JSON",
+    "NO_ARGS",
     "AnyNDArray",
     "Args",
     "BoolKeyCodec",
     "BytesFile",
     "DictDir",
-    "JSON",
     "JSONFile",
     "KeyCodec",
     "MutableJSON",
-    "NO_ARGS",
     "NpyFile",
     "NpzFile",
     "PandasCsvFile",

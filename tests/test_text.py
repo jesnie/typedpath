@@ -12,5 +12,5 @@ def test_text_file(tmp_path: Path) -> None:
     f.write("foo")
 
     assert d.exists()
-    assert "foo" == p.read_text()
-    assert "foo" == f.read()
+    assert p.read_text() == "foo"
+    assert f.read() == "foo"

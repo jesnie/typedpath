@@ -1,5 +1,6 @@
+from collections.abc import Iterator, Mapping
 from pathlib import Path
-from typing import Generic, Iterator, Mapping, Type, TypeVar
+from typing import Generic, TypeVar
 
 from typedpath.args import NO_ARGS, Args
 from typedpath.base import PathLikeLike, TypedDir, TypedPath
@@ -32,8 +33,8 @@ class DictDir(TypedDir, Mapping[K, TP], Generic[K, TP]):
     def __init__(
         self,
         path: PathLikeLike,
-        key_type: Type[K],
-        value_type: Type[TP],
+        key_type: type[K],
+        value_type: type[TP],
         *,
         key_codec: KeyCodec[K] | None = None,
         allow_subdirs: bool = False,
@@ -64,9 +65,7 @@ class DictDir(TypedDir, Mapping[K, TP], Generic[K, TP]):
     def _key_to_path(self, key: K) -> Path:
         key_str = self._codec.encode(key)
         key_ = self._codec.decode(key_str, self._key_type)
-        assert key_ == key, (
-            "DictDir key did not handle round-trip:" f" decodec(encode({key}))={key_}."
-        )
+        assert key_ == key, f"DictDir key did not handle round-trip: decodec(encode({key}))={key_}."
         assert key_str, "DictDir keys cannot be empty."
         if not self._allow_subdirs:
             assert "/" not in key_str, f"DictDir keys cannot contain '/'. Key: {key_str}"

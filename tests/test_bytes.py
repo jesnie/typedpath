@@ -12,5 +12,5 @@ def test_bytes_file(tmp_path: Path) -> None:
     f.write(b"foo")
 
     assert d.exists()
-    assert b"foo" == p.read_bytes()
-    assert b"foo" == f.read()
+    assert p.read_bytes() == b"foo"
+    assert f.read() == b"foo"
