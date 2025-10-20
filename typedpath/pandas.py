@@ -61,7 +61,7 @@ class PandasFeatherFile(TypedFile):
 
 
 ParquetEngine: TypeAlias = Literal["auto", "pyarrow", "fastparquet"]
-ParquetCompression: TypeAlias = Literal["snappy", "gzip", "brotli", None]
+ParquetCompression: TypeAlias = Literal["snappy", "gzip", "brotli"] | None
 
 
 class PandasParquetFile(TypedFile):
